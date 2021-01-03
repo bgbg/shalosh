@@ -1,0 +1,77 @@
+import json
+import os
+import pickle
+import shutil
+from pathlib import Path
+
+import s3fs
+
+class Serializer:
+    def __init__(self, s3_config):
+        if s3_config:
+            key = s3_config['accessKey']
+            secret = s3_config['accessSecret']
+            s3 = s3fs.S3FileSystem(key=key, secret=secret)
+        else:
+            s3 = None
+        self.s3 = s3
+
+    def path_exists(self, path):
+        if self.s3 is None:
+            return os.path.exists(path)
+        else:
+            return self.s3.exists(path)
+
+    def ls(self, path):
+        if self.s3 is None:
+            return os.listdir(path)
+        else:
+            return self.s3.ls(path)
+
+    def touch(self, path):
+        if self.s3 is None:
+            Path(path).touch()
+        else:
+            self.s3.touch(path)
+
+    def makedirs(self, dirs, exist_ok=True):
+        if self.s3 is None:
+            return os.makedirs(dirs, exist_ok=exist_ok)
+        else:
+            return self.s3.mkdir(dirs, exist_ok=exist_ok)
+
+    def rmtree(self, tree):
+        if self.s3 is None:
+            return shutil.rmtree(tree)
+        else:
+            return self.s3.rm(tree, recursive=True)
+
+    def rm(self, path):
+        if self.s3 is None:
+            return os.remove(path)
+        else:
+            return self.s3.rm(path)
+
+    def open(self, what, mode='r'):
+        if self.s3 is None:
+            return open(what, mode)
+        else:
+            return self.s3.open(what, mode)
+
+    def json_dump(self, what, where):
+        return json.dump(what, self.open(where, 'w'))
+
+    def json_load(self, where):
+        return json.load(self.open(where, 'r'))
+
+    def pickle_dump(self, what, where):
+        return pickle.dump(what, self.open(where, 'wb'))
+
+    def pickle_load(self, where):
+        return pickle.load(self.open(where, 'rb'))
+
+
+if __name__ == '__main__':
+    this_dir = os.path.split(__file__)[0]
+    config = json.load(open(os.path.join(this_dir, 'secret/config.json')))
+    sr = Serializer(config['s3'])
