@@ -8,10 +8,13 @@ import s3fs
 
 class Serializer:
     def __init__(self, s3_config):
-        if s3_config:
-            key = s3_config['accessKey']
-            secret = s3_config['accessSecret']
-            s3 = s3fs.S3FileSystem(key=key, secret=secret)
+        if s3_config is not None:
+            if isinstance(s3_config, s3fs.S3FileSystem):
+                s3 = s3_config
+            else:
+                key = s3_config['accessKey']
+                secret = s3_config['accessSecret']
+                s3 = s3fs.S3FileSystem(key=key, secret=secret)
         else:
             s3 = None
         self.s3 = s3
@@ -24,9 +27,14 @@ class Serializer:
 
     def ls(self, path):
         if self.s3 is None:
+            if not path:
+                path = './'
             return os.listdir(path)
         else:
-            return self.s3.ls(path)
+            ls = self.s3.ls(path)
+            # Emulate the behaviour of os.listdir
+            ls = [l.split('/', maxsplit=1)[-1] for l in ls]
+            return ls
 
     def touch(self, path):
         if self.s3 is None:
