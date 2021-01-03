@@ -14,16 +14,20 @@ def serializer():
     serializer = Serializer(None)
     return serializer
 
+
 def test_none_is_none():
     serializer = Serializer(None)
     assert serializer.s3 is None
 
+
 def test_path_exists(tmpdir, serializer):
     assert serializer.path_exists(tmpdir)
+
 
 def test_ls_empty(tmpdir, serializer):
     ls = serializer.ls(tmpdir)
     assert not ls
+
 
 def test_touch_non_existing(tmpdir, serializer):
     fn = uuid.uuid4().hex
@@ -34,6 +38,7 @@ def test_touch_non_existing(tmpdir, serializer):
     serializer.rm(path)
     assert not serializer.path_exists(path)
 
+
 def test_touch_existing(tmpdir, serializer):
     fn = uuid.uuid4().hex
     path = os.path.join(tmpdir, fn)
@@ -43,6 +48,7 @@ def test_touch_existing(tmpdir, serializer):
     assert serializer.path_exists(path)
     serializer.rm(path)
     assert not serializer.path_exists(path)
+
 
 def test_ls_existing_files(tmpdir, serializer):
     N = 4
@@ -68,6 +74,7 @@ def test_makedirs_one(tmpdir, serializer):
     assert serializer.path_exists(path)
     serializer.rmtree(path)
 
+
 def test_makedirs_several(tmpdir, serializer):
     DEPTH = 3
     dnames = [uuid.uuid4().hex for _ in range(DEPTH)]
@@ -77,9 +84,11 @@ def test_makedirs_several(tmpdir, serializer):
     assert serializer.path_exists(path)
     serializer.rmtree(path)
 
+
 def test_rmtree(tmpdir, serializer):
     # This is the same as:
     test_makedirs_several(tmpdir, serializer)
+
 
 def test_rmtree_non_existing(tmpdir, serializer):
     path = os.path.join(tmpdir, uuid.uuid4().hex)
@@ -129,15 +138,3 @@ def test_pickle_dump_and_load(tmpdir, serializer):
             loaded, sort_keys=True
         )  # the easiest way I know to compare nested dicts
         serializer.rm(where)
-
-# def json_dump(self, what, where):
-#     return json.dump(what, self.open(where, 'w'))
-#
-# def json_load(self, where):
-#     return json.load(self.open(where, 'r'))
-#
-# def pickle_dump(self, what, where):
-#     return pickle.dump(what, self.open(where, 'wb'))
-#
-# def pickle_load(self, where):
-#     return pickle.load(self.open(where, 'rb'))
