@@ -3,11 +3,29 @@ import os
 import pickle
 import shutil
 from pathlib import Path
+from typing import Union
 
 import s3fs
 
+
 class Serializer:
-    def __init__(self, s3_config):
+    """
+    Seriealizer that can serialize/deserialize to/from local filesystem or S3
+    """
+
+    def __init__(self, s3_config: Union[dict, None]):
+        """
+        Create a seriealizer object.
+
+        Depending on `s3_config`, the object will work with the local filesystem or S3
+
+
+        :param s3_config:
+            If `None`, use the local filesystem.
+            Otherwise, use the provided credentials to connect to S3. The config dictionary
+            has to contain the following keys: `"defaultBucket", "accessKey", "accessSecret"`
+            If other keys exist, they are ignored
+        """
         if s3_config is not None:
             if isinstance(s3_config, s3fs.S3FileSystem):
                 s3 = s3_config
