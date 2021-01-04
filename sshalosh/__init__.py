@@ -1,1 +1,1 @@
-from sshalosh import sshalosh
+from sshalosh.sshalosh import Serializer
