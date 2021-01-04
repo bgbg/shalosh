@@ -4,15 +4,9 @@ import random
 import string
 import uuid
 
-import boto3
-import pytest
-import s3fs
-
 from sshalosh import Serializer
 
 import pytest
-
-import moto
 
 
 def get_s3_config():
